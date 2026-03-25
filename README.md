@@ -75,6 +75,28 @@ This will:
 3. Calculate daily growth metrics
 4. Send an email digest with top accelerating repositories
 
+## GitHub Actions Automation
+
+This repo includes a workflow that runs the pipeline on a schedule and can be triggered manually.
+
+### Setup Secrets
+Create these repository secrets in GitHub (`Settings` -> `Secrets and variables` -> `Actions`):
+
+- `MONGO_URI`
+- `DB_NAME`
+- `OPENAI_API_KEY`
+- `OPENAI_BASE_URL` (optional, defaults to `https://openrouter.ai/api/v1`)
+- `OPENAI_MODEL` (optional, defaults to `arcee-ai/trinity-mini:free`)
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASS`
+
+### Schedule
+The workflow is scheduled daily at **02:00 UTC**. Update the cron expression in
+`.github/workflows/repodradar-pipeline.yml` if you want a different time.
+
 ## Pipeline Components
 
 ### 1. Scraper (`scraper/scrape_trending.py`)
