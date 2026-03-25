@@ -85,8 +85,8 @@ Create these repository secrets in GitHub (`Settings` -> `Secrets and variables`
 - `MONGO_URI`
 - `DB_NAME`
 - `OPENAI_API_KEY`
-- `OPENAI_BASE_URL` (optional, defaults to `https://openrouter.ai/api/v1`)
-- `OPENAI_MODEL` (optional, defaults to `arcee-ai/trinity-mini:free`)
+- `OPENAI_BASE_URL` 
+- `OPENAI_MODEL`
 - `SMTP_HOST`
 - `SMTP_PORT`
 - `SMTP_SECURE`
