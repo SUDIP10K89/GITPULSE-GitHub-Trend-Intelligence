@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitPulse - GitHub Trending Digest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['Ubuntu Mono', 'monospace'],
+                        display: ['Ubuntu', 'sans-serif'],
+                    },
+                    colors: {
+                        night: '#0a0a0f',
+                        void: '#0f0f1a',
+                        panel: '#13131f',
+                        border: '#1e1e30',
+                        cyan: { DEFAULT: '#00e5ff', dim: '#00b8cc' },
+                        violet: { DEFAULT: '#8b5cf6', dim: '#6d42d4' },
+                        emerald: { DEFAULT: '#00ff88' },
+                        muted: '#4a4a6a',
+                        soft: '#9090b0',
+                    },
+                    animation: {
+                        'fade-up': 'fadeUp 0.6s ease forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'blink': 'blink 1.2s step-end infinite',
+                        'scan': 'scan 2s linear infinite',
+                    },
+                    keyframes: {
+                        fadeUp: {
+                            '0%': { opacity: '0', transform: 'translateY(24px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        blink: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0' },
+                        },
+                        scan: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100vh)' },
+                        }
+                    },
+                    boxShadow: {
+                        'cyan-glow': '0 0 20px rgba(0,229,255,0.2), 0 0 60px rgba(0,229,255,0.05)',
+                        'violet-glow': '0 0 20px rgba(139,92,246,0.2)',
+                        'emerald-glow': '0 0 20px rgba(0,255,136,0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0a0a0f; }
+
+        /* Scanline overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Moving scan line */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent);
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+            z-index: 51;
+        }
+
+        /* Grid background */
+        .grid-bg {
+            background-image:
+                linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Glow text */
+        .glow-cyan {
+            text-shadow: 0 0 20px rgba(0,229,255,0.5), 0 0 40px rgba(0,229,255,0.2);
+        }
+        .glow-violet {
+            text-shadow: 0 0 20px rgba(139,92,246,0.5);
+        }
+
+        /* Animated gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #00e5ff 0%, #8b5cf6 50%, #00e5ff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        @keyframes scan {
+            0% { top: -2px; }
+            100% { top: 100vh; }
+        }
+
+        /* Terminal cursor */
+        .cursor::after {
+            content: '█';
+            animation: blink 1.2s step-end infinite;
+            color: #00e5ff;
+            font-size: 0.8em;
+        }
+
+        /* Custom input */
+        .term-input {
+            background: rgba(0,229,255,0.03);
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #e0e0f0;
+            font-family: 'Ubuntu Mono', monospace;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .term-input:focus {
+            outline: none;
+            border-color: rgba(0,229,255,0.6);
+            box-shadow: 0 0 0 3px rgba(0,229,255,0.08), 0 0 20px rgba(0,229,255,0.1);
+        }
+        .term-input::placeholder { color: #2e2e50; }
+
+        /* Panel */
+        .panel {
+            background: rgba(19,19,31,0.9);
+            border: 1px solid #1e1e30;
+            backdrop-filter: blur(12px);
+        }
+        .panel-accent-cyan {
+            border-top: 1px solid rgba(0,229,255,0.4);
+        }
+        .panel-accent-violet {
+            border-top: 1px solid rgba(139,92,246,0.4);
+        }
+
+        /* Stagger animation delays */
+        .delay-1 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-2 { animation-delay: 0.25s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-3 { animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards; }
+        .delay-4 { animation-delay: 0.55s; opacity: 0; animation-fill-mode: forwards; }
+
+        /* Corner decorators */
+        .corner-tl::before,
+        .corner-tl::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+        }
+        .corner-tl::before {
+            top: -1px; left: -1px;
+            border-top: 2px solid #00e5ff;
+            border-left: 2px solid #00e5ff;
+        }
+
+        /* Message styles */
+        #message { display: none; }
+        #status { display: none; }
+
+        /* Button press */
+        .btn-press:active { transform: scale(0.98); }
+
+        /* Feature list */
+        .feature-line {
+            border-left: 2px solid rgba(0,229,255,0.2);
+            transition: border-color 0.2s;
+        }
+        .feature-line:hover {
+            border-left-color: rgba(0,229,255,0.6);
+        }
+    </style>
+</head>
+<body class="font-display text-[#c8c8e0] grid-bg min-h-screen">
+
+    <div class="max-w-2xl mx-auto px-5 py-16 space-y-8">
+
+        <!-- Header -->
+        <div class="text-center animate-fade-up delay-1 relative">
+            <!-- Radar icon, custom SVG -->
+            <div class="inline-flex items-center justify-center w-16 h-16 mb-5 relative">
+                <div class="absolute inset-0 rounded-full border border-cyan-DEFAULT/20 animate-pulse-slow"></div>
+                <div class="absolute inset-2 rounded-full border border-cyan-DEFAULT/10"></div>
+                <svg viewBox="0 0 64 64" class="w-10 h-10 relative z-10" fill="none">
+                    <circle cx="32" cy="32" r="28" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.3"/>
+                    <circle cx="32" cy="32" r="18" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.2"/>
+                    <circle cx="32" cy="32" r="8" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.4"/>
+                    <circle cx="32" cy="32" r="2.5" fill="#00e5ff" fill-opacity="0.9"/>
+                    <line x1="32" y1="32" x2="52" y2="12" stroke="#00e5ff" stroke-width="1.5" stroke-opacity="0.7" stroke-linecap="round"/>
+                    <circle cx="46" cy="18" r="2" fill="#00e5ff" fill-opacity="0.6"/>
+                    <circle cx="24" cy="20" r="1.5" fill="#8b5cf6" fill-opacity="0.7"/>
+                    <circle cx="40" cy="38" r="1.5" fill="#00ff88" fill-opacity="0.6"/>
+                </svg>
+            </div>
+
+            <h1 class="text-5xl font-black tracking-tighter gradient-text glow-cyan mb-2">
+                GitPulse
+            </h1>
+            <p class="font-mono text-sm text-[#4a4a6a] tracking-widest uppercase">
+                <span class="text-cyan-DEFAULT/60">//</span>
+                Stay ahead with daily GitHub trending insights
+                <span class="cursor"></span>
+            </p>
+        </div>
+
+        <!-- What is RepoRadar -->
+        <div class="panel rounded-xl p-7 panel-accent-cyan animate-fade-up delay-2 relative overflow-hidden">
+            <!-- Corner -->
+            <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-DEFAULT/60 rounded-tl"></div>
+            <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-DEFAULT/60 rounded-tr"></div>
+            <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-DEFAULT/20 rounded-bl"></div>
+            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-DEFAULT/20 rounded-br"></div>
+
+            <div class="flex items-center gap-2 mb-4">
+                <span class="font-mono text-xs text-cyan-DEFAULT/50 tracking-widest uppercase">sys.info</span>
+                <div class="flex-1 h-px bg-gradient-to-r from-cyan-DEFAULT/20 to-transparent"></div>
+            </div>
+
+            <h2 class="text-xl font-bold text-white mb-3">What is GitPulse?</h2>
+            <p class="text-[#6060a0] font-mono text-sm leading-relaxed mb-5">
+                GitPulse monitors GitHub's trending repositories daily and delivers a curated digest to your inbox. Never miss the next big open-source project again.
+            </p>
+
+            <ul class="space-y-3">
+                <li class="feature-line pl-4 py-1">
+                    <span class="font-mono text-xs text-cyan-DEFAULT/70 block">01 —</span>
+                    <span class="text-[#8888b0] text-sm">Scrapes trending repositories automatically every day</span>
+                </li>
+                <li class="feature-line pl-4 py-1">
+                    <span class="font-mono text-xs text-violet-DEFAULT/70 block">02 —</span>
+                    <span class="text-[#8888b0] text-sm">AI-powered categorization into AI, DevTools, Web, Mobile, and more</span>
+                </li>
+                <li class="feature-line pl-4 py-1">
+                    <span class="font-mono text-xs text-emerald-DEFAULT/70 block">03 —</span>
+                    <span class="text-[#8888b0] text-sm">Tracks star growth to identify accelerating projects</span>
+                </li>
+                <li class="feature-line pl-4 py-1">
+                    <span class="font-mono text-xs text-cyan-DEFAULT/70 block">04 —</span>
+                    <span class="text-[#8888b0] text-sm">Delivers a daily email with top accelerating repos</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Email preview -->
+        <div class="panel rounded-xl p-7 panel-accent-cyan animate-fade-up delay-3 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-DEFAULT/60 rounded-tl"></div>
+            <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-DEFAULT/60 rounded-tr"></div>
+            <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-DEFAULT/20 rounded-bl"></div>
+            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-DEFAULT/20 rounded-br"></div>
+
+            <div class="flex items-center gap-2 mb-5">
+                <span class="font-mono text-xs text-cyan-DEFAULT/50 tracking-widest uppercase">digest.preview</span>
+                <div class="flex-1 h-px bg-gradient-to-r from-cyan-DEFAULT/20 to-transparent"></div>
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-4">Email Theme Preview</h3>
+
+            <div class="rounded-xl border border-[#1e1e30] bg-[#0b0f14] p-4 shadow-cyan-glow">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background:#010409;">
+                    <tr>
+                        <td align="center" style="padding:18px 10px;">
+                            <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;">
+                                <tr>
+                                    <td style="padding-bottom:16px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0"
+                                            style="background:#0d1117;border:1px solid #30363d;border-radius:6px;">
+                                            <tr>
+                                                <td style="padding:20px 24px 0;">
+                                                    <table width="100%" cellpadding="0" cellspacing="0">
+                                                        <tr>
+                                                            <td>
+                                                                <div style="font-size:18px;font-weight:700;color:#e6edf3;
+                                                                    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;letter-spacing:-0.2px;">
+                                                                    GitPulse
+                                                                </div>
+                                                                <div style="font-size:12px;color:#8b949e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;margin-top:2px;">
+                                                                    Daily Digest · Sample Preview
+                                                                </div>
+                                                            </td>
+                                                            <td align="right" style="vertical-align:top;">
+                                                                <span style="font-size:11px;color:#8b949e;font-family:monospace;
+                                                                    background:#161b22;border:1px solid #30363d;
+                                                                    border-radius:6px;padding:4px 10px;white-space:nowrap;">
+                                                                    sorted by star growth
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:0 24px;border-top:1px solid #30363d;margin-top:12px;">
+                                                    <span style="display:inline-block;font-size:13px;font-weight:600;
+                                                        color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+                                                        border-bottom:2px solid #f78166;padding:10px 0;margin-bottom:-1px;">
+                                                        Trending today
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border:1px solid #30363d;border-radius:6px;overflow:hidden;">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td>
+                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                                        style="background:#0d1117;border-bottom:1px solid #21262d;">
+                                                        <tr>
+                                                            <td style="padding:16px 24px;">
+                                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td>
+                                                                            <span style="font-size:12px;color:#6e7681;font-family:monospace;
+                                                                                margin-right:8px;">#1</span>
+                                                                            <span style="font-size:15px;font-weight:600;color:#58a6ff;
+                                                                                font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                repo-radar-ui
+                                                                            </span>
+                                                                        </td>
+                                                                        <td align="right" style="white-space:nowrap;">
+                                                                            <span style="font-size:12px;font-weight:600;color:#3fb950;font-family:monospace;
+                                                                                background:rgba(46,160,67,0.1);border:1px solid rgba(46,160,67,0.4);
+                                                                                border-radius:2em;padding:3px 10px;">
+                                                                                +1,248 today
+                                                                            </span>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <p style="margin:8px 0 12px;font-size:13px;color:#8b949e;line-height:1.5;
+                                                                    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                    Clean, GitHub-inspired UI kit for trend tracking dashboards.
+                                                                </p>
+                                                                <table cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td style="padding-right:16px;">
+                                                                            <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;
+                                                                                color:#8b949e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                <span style="width:10px;height:10px;border-radius:50%;background:#3178c6;
+                                                                                    display:inline-block;flex-shrink:0;"></span>TypeScript
+                                                                            </span>
+                                                                        </td>
+                                                                        <td style="padding-right:16px;">
+                                                                            <span style="font-size:12px;color:#8b949e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                ★ 18,502
+                                                                            </span>
+                                                                        </td>
+                                                                        <td style="padding-right:16px;">
+                                                                            <span style="font-size:12px;color:#8b949e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                ⑂ 1,321
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span style="font-size:11px;font-weight:500;color:#8b949e;
+                                                                                background:rgba(110,118,129,0.1);border:1px solid #30363d;
+                                                                                border-radius:2em;padding:2px 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                Web
+                                                                            </span>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                                        style="background:#0d1117;border-bottom:1px solid #21262d;">
+                                                        <tr>
+                                                            <td style="padding:16px 24px;">
+                                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td>
+                                                                            <span style="font-size:12px;color:#6e7681;font-family:monospace;
+                                                                                margin-right:8px;">#2</span>
+                                                                            <span style="font-size:15px;font-weight:600;color:#58a6ff;
+                                                                                font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                trendpipe
+                                                                            </span>
+                                                                        </td>
+                                                                        <td align="right" style="white-space:nowrap;">
+                                                                            <span style="font-size:12px;font-weight:600;color:#3fb950;font-family:monospace;
+                                                                                background:rgba(46,160,67,0.1);border:1px solid rgba(46,160,67,0.4);
+                                                                                border-radius:2em;padding:3px 10px;">
+                                                                                +834 today
+                                                                            </span>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <p style="margin:8px 0 12px;font-size:13px;color:#8b949e;line-height:1.5;
+                                                                    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                    Zero-config pipeline for detecting accelerating GitHub repos.
+                                                                </p>
+                                                                <table cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td style="padding-right:16px;">
+                                                                            <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;
+                                                                                color:#8b949e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                <span style="width:10px;height:10px;border-radius:50%;background:#3572A5;
+                                                                                    display:inline-block;flex-shrink:0;"></span>Python
+                                                                            </span>
+                                                                        </td>
+                                                                        <td style="padding-right:16px;">
+                                                                            <span style="font-size:12px;color:#8b949e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                ★ 9,440
+                                                                            </span>
+                                                                        </td>
+                                                                        <td style="padding-right:16px;">
+                                                                            <span style="font-size:12px;color:#8b949e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                ⑂ 611
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <span style="font-size:11px;font-weight:500;color:#8b949e;
+                                                                                background:rgba(110,118,129,0.1);border:1px solid #30363d;
+                                                                                border-radius:2em;padding:2px 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+                                                                                AI
+                                                                            </span>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-top:16px;text-align:center;
+                                        font-size:11px;color:#484f58;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;line-height:1.6;">
+                                        GitPulse · Automated Daily Digest
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <p class="mt-4 text-xs text-[#4a4a6a] font-mono">
+                Preview uses the exact email layout with sample data.
+            </p>
+        </div>
+
+        <!-- Subscribe card -->
+        <div class="panel rounded-xl p-7 panel-accent-violet animate-fade-up delay-4 relative overflow-hidden">
+            <!-- Corner decorators -->
+            <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-violet-DEFAULT/60 rounded-tl"></div>
+            <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-violet-DEFAULT/60 rounded-tr"></div>
+            <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-violet-DEFAULT/20 rounded-bl"></div>
+            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-violet-DEFAULT/20 rounded-br"></div>
+
+            <div class="flex items-center gap-2 mb-5">
+                <span class="font-mono text-xs text-violet-DEFAULT/50 tracking-widest uppercase">subscribe.exec</span>
+                <div class="flex-1 h-px bg-gradient-to-r from-violet-DEFAULT/20 to-transparent"></div>
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-5">Subscribe to Daily Digest</h3>
+
+            <div class="mb-5">
+                <label for="email" class="font-mono text-xs text-[#4a4a6a] uppercase tracking-widest block mb-2">
+                    &gt; email_address
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="you@example.com"
+                    required
+                    class="term-input w-full px-4 py-3.5 rounded-lg text-sm"
+                />
+            </div>
+
+            <div class="flex gap-3">
+                <button
+                    onclick="subscribe()"
+                    class="btn-press flex-1 py-3.5 rounded-lg font-bold text-sm font-mono tracking-wide text-night transition-all duration-200 relative overflow-hidden group"
+                    style="background: linear-gradient(135deg, #00e5ff, #8b5cf6);"
+                >
+                    <span class="relative z-10">[ SUBSCRIBE ]</span>
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                         style="background: linear-gradient(135deg, #00b8cc, #6d42d4);"></div>
+                </button>
+
+                <button
+                    onclick="unsubscribe()"
+                    class="btn-press flex-1 py-3.5 rounded-lg font-bold text-sm font-mono tracking-wide text-[#6060a0] border border-[#1e1e30] hover:border-[#3e3e60] hover:text-[#9090c0] transition-all duration-200"
+                    style="background: rgba(255,255,255,0.02);"
+                >
+                    [ UNSUB ]
+                </button>
+            </div>
+
+            <!-- Message / Status -->
+            <div id="message" class="mt-4 px-4 py-3 rounded-lg font-mono text-sm text-center"></div>
+
+            <div id="status" class="mt-4 px-5 py-4 rounded-lg text-center border"
+                 style="background: rgba(0,255,136,0.04); border-color: rgba(0,255,136,0.15);">
+                <div class="text-2xl mb-1" id="status-icon">✓</div>
+                <p id="status-text" class="font-mono text-sm text-emerald-DEFAULT/80"></p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center animate-fade-up delay-4">
+            <p class="font-mono text-xs text-[#2e2e50] tracking-widest">
+                POWERED BY <a href="#" class="text-cyan-DEFAULT/50 hover:text-cyan-DEFAULT transition-colors">GITPULSE</a>
+                <span class="mx-2 text-[#1e1e40]">|</span>
+                <span class="text-[#2e2e50]">OPEN SOURCE</span>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            const status = document.getElementById('status');
+
+            // Hide status
+            status.style.display = 'none';
+
+            // Style by type
+            const styles = {
+                success: {
+                    display: 'block',
+                    background: 'rgba(0,255,136,0.06)',
+                    border: '1px solid rgba(0,255,136,0.2)',
+                    color: '#00ff88',
+                },
+                error: {
+                    display: 'block',
+                    background: 'rgba(255,82,82,0.06)',
+                    border: '1px solid rgba(255,82,82,0.2)',
+                    color: '#ff5252',
+                },
+                info: {
+                    display: 'block',
+                    background: 'rgba(0,229,255,0.06)',
+                    border: '1px solid rgba(0,229,255,0.2)',
+                    color: '#00e5ff',
+                },
+            };
+
+            const s = styles[type] || styles.info;
+            Object.assign(msg.style, s);
+            msg.textContent = '> ' + text;
+        }
+
+        function showStatus(text, isSubscribed) {
+            const msg = document.getElementById('message');
+            const status = document.getElementById('status');
+            const icon = document.getElementById('status-icon');
+
+            msg.style.display = 'none';
+
+            status.style.display = 'block';
+            if (isSubscribed) {
+                status.style.background = 'rgba(0,255,136,0.04)';
+                status.style.borderColor = 'rgba(0,255,136,0.15)';
+                icon.textContent = '✓';
+                icon.style.color = '#00ff88';
+                document.getElementById('status-text').style.color = 'rgba(0,255,136,0.8)';
+            } else {
+                status.style.background = 'rgba(0,229,255,0.04)';
+                status.style.borderColor = 'rgba(0,229,255,0.15)';
+                icon.textContent = '○';
+                icon.style.color = '#00e5ff';
+                document.getElementById('status-text').style.color = 'rgba(0,229,255,0.7)';
+            }
+            document.getElementById('status-text').textContent = text;
+        }
+
+        async function subscribe() {
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                showMessage('Please enter an email address', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/subscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus(`Status: active for ${email}`, true);
+                } else {
+                    showMessage(data.detail || 'Subscription failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server. Is it running?', 'error');
+            }
+        }
+
+        async function unsubscribe() {
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                showMessage('Please enter an email address', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/unsubscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.was_subscribed) {
+                        showStatus(`Status: inactive for ${email}`, false);
+                    } else {
+                        showMessage(`Status: inactive for ${email}`, 'info');
+                    }
+                } else {
+                    showMessage(data.detail || 'Unsubscription failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Unable to connect to server. Is it running?', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

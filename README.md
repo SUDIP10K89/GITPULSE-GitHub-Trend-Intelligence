@@ -57,7 +57,6 @@ OPENAI_API_KEY=your-api-key
 
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 ```
@@ -89,7 +88,6 @@ Create these repository secrets in GitHub (`Settings` -> `Secrets and variables`
 - `OPENAI_MODEL` (optional, defaults to `arcee-ai/trinity-mini:free`)
 - `SMTP_HOST`
 - `SMTP_PORT`
-- `SMTP_SECURE`
 - `SMTP_USER`
 - `SMTP_PASS`
 

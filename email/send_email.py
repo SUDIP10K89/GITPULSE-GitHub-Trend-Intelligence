@@ -12,6 +12,7 @@ load_dotenv()
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client[os.getenv("DB_NAME")]
 collection = db["trending_repos"]
+subscribers_collection = db["subscribers"]
 
 today = datetime.utcnow().date()
 
@@ -235,17 +236,31 @@ for i, repo in enumerate(repo_list, 1):
     plain_body += f"\n   {repo.get('url', '')}\n\n"
 
 
-msg = MIMEMultipart("alternative")
-msg["Subject"] = f"GitPulse Daily Digest - {datetime.utcnow().strftime('%b %d, %Y')}"
-msg["From"] = os.getenv("SMTP_USER")
-msg["To"] = os.getenv("SMTP_USER")
+subject = f"GitPulse Daily Digest - {datetime.utcnow().strftime('%b %d, %Y')}"
+from_email = os.getenv("SMTP_USER")
+subscribers = list(subscribers_collection.find({"active": True}, {"email": 1, "_id": 0}))
 
-msg.attach(MIMEText(plain_body, "plain"))
-msg.attach(MIMEText(html_body, "html"))
+if not subscribers:
+    print("No active subscribers found. No emails were sent.")
+else:
+    sent_count = 0
+    failed_count = 0
 
-with smtplib.SMTP(os.getenv("SMTP_HOST"), int(os.getenv("SMTP_PORT"))) as server:
-    server.starttls()
-    server.login(os.getenv("SMTP_USER"), os.getenv("SMTP_PASS"))
-    server.send_message(msg)
+    with smtplib.SMTP(os.getenv("SMTP_HOST"), int(os.getenv("SMTP_PORT"))) as server:
+        server.starttls()
+        server.login(os.getenv("SMTP_USER"), os.getenv("SMTP_PASS"))
+        for sub in subscribers:
+            try:
+                msg = MIMEMultipart("alternative")
+                msg["Subject"] = subject
+                msg["From"] = from_email
+                msg["To"] = sub["email"]
+                msg.attach(MIMEText(plain_body, "plain"))
+                msg.attach(MIMEText(html_body, "html"))
+                server.send_message(msg)
+                sent_count += 1
+            except Exception as e:
+                print(f"Failed to send to {sub.get('email')}: {e}")
+                failed_count += 1
 
-print("Email sent successfully!")
+    print(f"Email send complete. Sent: {sent_count}, Failed: {failed_count}")
