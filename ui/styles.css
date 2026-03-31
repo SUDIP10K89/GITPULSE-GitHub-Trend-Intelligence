@@ -1,0 +1,148 @@
+/* Tailwind Config */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { 
+    background-color: #0a0a0f; 
+}
+
+/* Scanline overlay */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 50;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent);
+    animation: scan 4s linear infinite;
+    pointer-events: none;
+    z-index: 51;
+}
+
+.grid-bg {
+    background-image:
+        linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.glow-cyan { text-shadow: 0 0 20px rgba(0,229,255,0.5), 0 0 40px rgba(0,229,255,0.2); }
+.glow-violet { text-shadow: 0 0 20px rgba(139,92,246,0.5); }
+
+.gradient-text {
+    background: linear-gradient(135deg, #00e5ff 0%, #8b5cf6 50%, #00e5ff 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes scan {
+    0% { top: -2px; }
+    100% { top: 100vh; }
+}
+
+.cursor::after {
+    content: '█';
+    animation: blink 1.2s step-end infinite;
+    color: #00e5ff;
+    font-size: 0.8em;
+}
+
+/* Terminal Input */
+.term-input {
+    background: rgba(0,229,255,0.03);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: #e0e0f0;
+    font-family: 'Ubuntu Mono', monospace;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.term-input:focus {
+    outline: none;
+    border-color: rgba(0,229,255,0.6);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.08), 0 0 20px rgba(0,229,255,0.1);
+}
+
+/* Panel */
+.panel {
+    background: rgba(19,19,31,0.9);
+    border: 1px solid #1e1e30;
+    backdrop-filter: blur(12px);
+}
+
+/* Animations */
+.animate-fade-up { animation: fadeUp 0.6s ease forwards; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.25s; }
+.delay-3 { animation-delay: 0.4s; }
+.delay-4 { animation-delay: 0.55s; }
+
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Other styles (feature lines, buttons, etc.) */
+.btn-press:active { transform: scale(0.98); }
+
+.feature-line {
+    border-left: 2px solid rgba(0,229,255,0.2);
+    transition: border-color 0.2s;
+}
+.feature-line:hover {
+    border-left-color: rgba(0,229,255,0.6);
+}
+
+/* Corner Decorators */
+.corner-tl::before, .corner-tl::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+}
+
+/* Responsive Email Preview */
+.repo-item {
+    transition: all 0.2s ease;
+}
+
+@media (max-width: 480px) {
+    .repo-item {
+        margin-bottom: 16px;
+    }
+    
+    .repo-item div[style*="padding:16px 20px"] {
+        padding: 14px 16px !important;
+    }
+    
+    .repo-item p {
+        font-size: 13px !important;
+        line-height: 1.45 !important;
+    }
+}
