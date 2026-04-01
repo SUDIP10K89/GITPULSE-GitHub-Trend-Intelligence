@@ -10,6 +10,7 @@ load_dotenv()
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client[os.getenv("DB_NAME")]
 collection = db["trending_repos"]
+collection.create_index([("name", 1), ("scraped_date", 1)], unique=True)
 
 URL = "https://github.com/trending"
 headers = {"User-Agent": "Mozilla/5.0"}
@@ -22,6 +23,9 @@ if response.status_code != 200:
 
 soup = BeautifulSoup(response.text, "html.parser")
 repos = soup.find_all("article", class_="Box-row")
+
+inserted = 0
+today = datetime.utcnow().date().isoformat()
 
 for repo in repos:
     name_tag = repo.h2.a
@@ -47,9 +51,18 @@ for repo in repos:
         "language": language,
         "stars": stars,
         "forks": forks,
+        "scraped_date": today,
         "scraped_at": datetime.utcnow()
     }
 
-    collection.insert_one(repo_data)
+    result = collection.update_one(
+        {"name": name, "scraped_date": today},
+        {"$setOnInsert": repo_data},
+        upsert=True
+    )
+    if result.upserted_id is not None:
+        inserted += 1
+    else:
+        print(f"Skipped duplicate for today: {name}")
 
-print(f"Inserted {len(repos)} repos into MongoDB")
+print(f"Inserted {inserted} repos into MongoDB")
