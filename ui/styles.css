@@ -119,6 +119,51 @@ body::after {
     border-left-color: rgba(0,229,255,0.6);
 }
 
+/* Category pills */
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.category-pill input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.category-pill span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 9999px;
+    border: 1px solid rgba(139,92,246,0.25);
+    background: radial-gradient(120% 120% at 10% 10%, rgba(0,229,255,0.08), rgba(139,92,246,0.04));
+    color: #b6b6d6;
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, color 0.2s ease;
+}
+.category-pill span:hover {
+    border-color: rgba(0,229,255,0.6);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
+}
+.category-pill input:checked + span {
+    border-color: rgba(0,255,136,0.6);
+    color: #eafff6;
+    background: radial-gradient(120% 120% at 10% 10%, rgba(0,255,136,0.18), rgba(0,229,255,0.08));
+    box-shadow: 0 0 0 3px rgba(0,255,136,0.12), 0 0 18px rgba(0,255,136,0.12);
+}
+.category-pill input:focus + span {
+    outline: none;
+    border-color: rgba(0,229,255,0.8);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.12);
+}
+
 /* Corner Decorators */
 .corner-tl::before, .corner-tl::after {
     content: '';

@@ -238,7 +238,10 @@ for i, repo in enumerate(repo_list, 1):
 
 subject = f"GitPulse Daily Digest - {datetime.utcnow().strftime('%b %d, %Y')}"
 from_email = os.getenv("SMTP_USER")
-subscribers = list(subscribers_collection.find({"active": True}, {"email": 1, "_id": 0}))
+subscribers = list(subscribers_collection.find(
+    {"active": True},
+    {"email": 1, "categories": 1, "category": 1, "_id": 0}
+))
 
 if not subscribers:
     print("No active subscribers found. No emails were sent.")
@@ -251,12 +254,48 @@ else:
         server.login(os.getenv("SMTP_USER"), os.getenv("SMTP_PASS"))
         for sub in subscribers:
             try:
+                # Backward-compatible category handling:
+                # - New schema: categories (list)
+                # - Old schema: category (string)
+                categories = []
+                if isinstance(sub.get("categories"), list):
+                    categories = [c for c in sub["categories"] if c]
+                elif isinstance(sub.get("category"), str) and sub.get("category"):
+                    categories = [sub["category"]]
+
+                if categories:
+                    filtered_repos = list(collection.find({
+                        "category": {"$in": categories},
+                        "scraped_at": {
+                            "$gte": datetime(today.year, today.month, today.day),
+                            "$lt": datetime(today.year, today.month, today.day) + timedelta(days=1)
+                        }
+                    }).sort("stars_growth", -1))
+                else:
+                    filtered_repos = repo_list
+
+                personalized_repos = filtered_repos[:10]
+                personalized_html = build_html_email(personalized_repos)
+                personalized_plain = f"GitPulse Daily Digest - {datetime.utcnow().strftime('%B %d, %Y')}\n"
+                if categories:
+                    personalized_plain += f"Top 10 repositories for categories: {', '.join(categories)}\n"
+                else:
+                    personalized_plain += "Top 10 repositories by star growth today\n"
+                personalized_plain += "=" * 48 + "\n\n"
+                for i, repo in enumerate(personalized_repos, 1):
+                    personalized_plain += f"{i}. {repo['name']} (+{repo.get('stars_growth', 0):,} stars)\n"
+                    personalized_plain += f"   {repo.get('description', 'N/A')}\n"
+                    personalized_plain += f"   Stars: {repo.get('stars', 0):,}  Forks: {repo.get('forks', 0):,}"
+                    if repo.get("language"):
+                        personalized_plain += f"  Language: {repo['language']}"
+                    personalized_plain += f"\n   {repo.get('url', '')}\n\n"
+
                 msg = MIMEMultipart("alternative")
                 msg["Subject"] = subject
                 msg["From"] = from_email
                 msg["To"] = sub["email"]
-                msg.attach(MIMEText(plain_body, "plain"))
-                msg.attach(MIMEText(html_body, "html"))
+                msg.attach(MIMEText(personalized_plain, "plain"))
+                msg.attach(MIMEText(personalized_html, "html"))
                 server.send_message(msg)
                 sent_count += 1
             except Exception as e:

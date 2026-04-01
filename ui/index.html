@@ -219,6 +219,39 @@
                        class="term-input w-full px-4 py-3.5 rounded-lg text-sm">
             </div>
 
+            <div class="mb-6">
+                <label class="font-mono text-xs text-[#4a4a6a] uppercase tracking-widest block mb-3">
+                    &gt; categories (optional)
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                    <label class="category-pill">
+                        <input type="checkbox" class="category-input" value="AI">
+                        <span>AI</span>
+                    </label>
+                    <label class="category-pill">
+                        <input type="checkbox" class="category-input" value="Developer Tools">
+                        <span>Developer Tools</span>
+                    </label>
+                    <label class="category-pill">
+                        <input type="checkbox" class="category-input" value="Infrastructure">
+                        <span>Infrastructure</span>
+                    </label>
+                    <label class="category-pill">
+                        <input type="checkbox" class="category-input" value="Web">
+                        <span>Web</span>
+                    </label>
+                    <label class="category-pill">
+                        <input type="checkbox" class="category-input" value="Mobile">
+                        <span>Mobile</span>
+                    </label>
+                    <label class="category-pill">
+                        <input type="checkbox" class="category-input" value="Other">
+                        <span>Other</span>
+                    </label>
+                </div>
+                <p class="mt-2 text-xs font-mono text-[#4a4a6a]">Leave empty to receive all categories.</p>
+            </div>
+
             <div class="flex gap-3">
                 <button onclick="subscribe()" 
                         class="btn-press flex-1 py-3.5 rounded-lg font-bold text-sm font-mono tracking-wide text-night transition-all duration-200 relative overflow-hidden group"

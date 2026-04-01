@@ -1,4 +1,5 @@
-const API_BASE = 'https://gitpulse-github-trend-intelligence.onrender.com/api';
+
+const API_BASE = 'http://127.0.0.1:8000/api';
 
 function showMessage(text, type = 'info') {
     const msg = document.getElementById('message');
@@ -40,6 +41,8 @@ function showStatus(text, isSubscribed) {
 
 async function subscribe() {
     const email = document.getElementById('email').value.trim();
+    const categoryNodes = document.querySelectorAll('.category-input:checked');
+    const categories = Array.from(categoryNodes).map(node => node.value);
     if (!email) {
         showMessage('Please enter an email address', 'error');
         return;
@@ -49,7 +52,7 @@ async function subscribe() {
         const response = await fetch(`${API_BASE}/subscribe`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
+            body: JSON.stringify({ email, categories })
         });
         const data = await response.json();
 
