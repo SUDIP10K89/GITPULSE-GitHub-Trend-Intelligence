@@ -1,5 +1,5 @@
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://gitpulse-github-trend-intelligence.onrender.com/api';
 
 function showMessage(text, type = 'info') {
     const msg = document.getElementById('message');
