@@ -52,6 +52,22 @@ def language_color(lang):
 
 FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
 
+def format_growth_badge(growth):
+    if growth is None:
+        return "new"
+    return f"+{growth:,} today"
+
+
+def format_growth_plain(growth):
+    if growth is None:
+        return "new"
+    return f"+{growth:,} stars"
+
+def format_multiple(multiple):
+    if multiple is None:
+        return "n/a"
+    return f"{multiple:.2f}x growth"
+
 
 def build_repo_card(repo, rank):
     name = repo.get("name", "Unknown")
@@ -59,10 +75,13 @@ def build_repo_card(repo, rank):
     language = repo.get("language", "")
     stars = repo.get("stars", 0)
     forks = repo.get("forks", 0)
-    growth = repo.get("stars_growth", 0)
+    growth = repo.get("stars_growth")
     category = repo.get("category", "")
+    growth_multiple = repo.get("growth_multiple")
     url = repo.get("url", "#")
     lang_color = language_color(language)
+    growth_badge_text = format_growth_badge(growth)
+    multiple_text = format_multiple(growth_multiple)
 
     lang_badge = f"""<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;
             color:#8b949e;font-family:{FONT};">
@@ -97,7 +116,7 @@ def build_repo_card(repo, rank):
                     <span style="font-size:12px;font-weight:600;color:#3fb950;font-family:monospace;
                         background:rgba(46,160,67,0.1);border:1px solid rgba(46,160,67,0.4);
                         border-radius:2em;padding:3px 10px;">
-                      +{growth:,} today
+                      {growth_badge_text}
                     </span>
                   </td>
                 </tr>
@@ -119,6 +138,11 @@ def build_repo_card(repo, rank):
                   <td style="padding-right:16px;">
                     <span style="font-size:12px;color:#8b949e;font-family:{FONT};">
                       &#x2442; {forks:,}
+                    </span>
+                  </td>
+                  <td style="padding-right:16px;">
+                    <span style="font-size:12px;color:#8b949e;font-family:{FONT};">
+                      {multiple_text}
                     </span>
                   </td>
                   <td>{category_pill}</td>
@@ -228,9 +252,11 @@ plain_body = f"GitPulse Daily Digest - {datetime.utcnow().strftime('%B %d, %Y')}
 plain_body += "Top 10 repositories by star growth today\n"
 plain_body += "=" * 48 + "\n\n"
 for i, repo in enumerate(repo_list, 1):
-    plain_body += f"{i}. {repo['name']} (+{repo.get('stars_growth', 0):,} stars)\n"
+    growth_plain = format_growth_plain(repo.get("stars_growth"))
+    multiple_plain = format_multiple(repo.get("growth_multiple"))
+    plain_body += f"{i}. {repo['name']} ({growth_plain})\n"
     plain_body += f"   {repo.get('description', 'N/A')}\n"
-    plain_body += f"   Stars: {repo.get('stars', 0):,}  Forks: {repo.get('forks', 0):,}"
+    plain_body += f"   Stars: {repo.get('stars', 0):,}  Forks: {repo.get('forks', 0):,}  {multiple_plain}"
     if repo.get("language"):
         plain_body += f"  Language: {repo['language']}"
     plain_body += f"\n   {repo.get('url', '')}\n\n"
@@ -283,9 +309,11 @@ else:
                     personalized_plain += "Top 10 repositories by star growth today\n"
                 personalized_plain += "=" * 48 + "\n\n"
                 for i, repo in enumerate(personalized_repos, 1):
-                    personalized_plain += f"{i}. {repo['name']} (+{repo.get('stars_growth', 0):,} stars)\n"
+                    growth_plain = format_growth_plain(repo.get("stars_growth"))
+                    multiple_plain = format_multiple(repo.get("growth_multiple"))
+                    personalized_plain += f"{i}. {repo['name']} ({growth_plain})\n"
                     personalized_plain += f"   {repo.get('description', 'N/A')}\n"
-                    personalized_plain += f"   Stars: {repo.get('stars', 0):,}  Forks: {repo.get('forks', 0):,}"
+                    personalized_plain += f"   Stars: {repo.get('stars', 0):,}  Forks: {repo.get('forks', 0):,}  {multiple_plain}"
                     if repo.get("language"):
                         personalized_plain += f"  Language: {repo['language']}"
                     personalized_plain += f"\n   {repo.get('url', '')}\n\n"

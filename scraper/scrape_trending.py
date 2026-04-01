@@ -4,12 +4,13 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 from datetime import datetime
+import re
 
 load_dotenv()
 
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client[os.getenv("DB_NAME")]
-collection = db["trending_repos"]
+collection = db["trending_repos_test"]
 collection.create_index([("name", 1), ("scraped_date", 1)], unique=True)
 
 URL = "https://github.com/trending"
@@ -44,6 +45,13 @@ for repo in repos:
     forks_tag = repo.find("a", href=lambda h: h and "/forks" in h)
     forks = int(forks_tag.text.strip().replace(",", "")) if forks_tag else 0
 
+    growth = None
+    growth_text = repo.find(string=re.compile(r"star[s]?\s+today", re.IGNORECASE))
+    if growth_text:
+        match = re.search(r"([\d,]+)\s+star[s]?\s+today", growth_text.strip(), re.IGNORECASE)
+        if match:
+            growth = int(match.group(1).replace(",", ""))
+
     repo_data = {
         "name": name,
         "url": url,
@@ -51,6 +59,7 @@ for repo in repos:
         "language": language,
         "stars": stars,
         "forks": forks,
+        "stars_growth": growth,
         "scraped_date": today,
         "scraped_at": datetime.utcnow()
     }

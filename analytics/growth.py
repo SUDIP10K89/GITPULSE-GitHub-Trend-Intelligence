@@ -1,7 +1,8 @@
 import os
+from datetime import datetime, timedelta
+
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -11,40 +12,38 @@ collection = db["trending_repos"]
 
 today = datetime.utcnow().date()
 yesterday = today - timedelta(days=1)
+today_str = today.isoformat()
+yesterday_str = yesterday.isoformat()
 
-# get todays repo
-today_repos = collection.find({
-    "scraped_at": {
-        "$gte": datetime(today.year, today.month, today.day),
-        "$lt": datetime(today.year, today.month, today.day) + timedelta(days=1)
-    }
-})
 
+yesterday_docs = collection.find(
+    {"scraped_date": yesterday_str},
+    {"name": 1, "stars_growth": 1}
+)
+yesterday_growth_by_name = {
+    doc.get("name"): doc.get("stars_growth") for doc in yesterday_docs
+}
+
+today_repos = collection.find(
+    {"scraped_date": today_str},
+    {"stars_growth": 1, "name": 1}
+)
+
+updated = 0
 for repo in today_repos:
-    name = repo["name"]
-    stars_today = repo["stars"]
+    name = repo.get("name")
+    growth_today = repo.get("stars_growth")
+    growth_yesterday = yesterday_growth_by_name.get(name)
 
-    # find yesterday record for same repo
-    yesterday_repo = collection.find_one({
-        "name": name,
-        "scraped_at": {
-            "$gte": datetime(yesterday.year, yesterday.month, yesterday.day),
-            "$lt": datetime(yesterday.year, yesterday.month, yesterday.day) + timedelta(days=1)
-        }
-    })
-
-    if yesterday_repo:
-        stars_yesterday = yesterday_repo["stars"]
-        growth = stars_today - stars_yesterday
+    if growth_today is None or growth_yesterday in (None, 0):
+        growth_multiple = None
     else:
-        growth = 0
+        growth_multiple = round(growth_today / growth_yesterday, 2)
 
-    # Update today document
     collection.update_one(
         {"_id": repo["_id"]},
-        {"$set": {"stars_growth": growth}}
+        {"$set": {"growth_multiple": growth_multiple}}
     )
+    updated += 1
 
-    print(f"{name} growth: {growth}")
-
-print("Growth calculation complete")
+print(f"Growth multiple calculation complete. Updated {updated} repos.")
