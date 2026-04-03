@@ -51,6 +51,8 @@ def language_color(lang):
 
 
 FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
+MONO = "'JetBrains Mono','Fira Code','Cascadia Code',monospace"
+
 
 def format_growth_badge(growth):
     if growth is None:
@@ -62,6 +64,7 @@ def format_growth_plain(growth):
     if growth is None:
         return "new"
     return f"+{growth:,} stars"
+
 
 def format_multiple(multiple):
     if multiple is None:
@@ -83,75 +86,86 @@ def build_repo_card(repo, rank):
     growth_badge_text = format_growth_badge(growth)
     multiple_text = format_multiple(growth_multiple)
 
-    lang_badge = f"""<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;
-            color:#8b949e;font-family:{FONT};">
-            <span style="width:10px;height:10px;border-radius:50%;background:{lang_color};
-                display:inline-block;flex-shrink:0;"></span>{language}
+    # Rank colour: gold → silver → bronze → dim
+    rank_colors = {1: "#e3b341", 2: "#8b949e", 3: "#da8a4a"}
+    rank_color = rank_colors.get(rank, "#484f58")
+
+    lang_badge = f"""
+        <span style="display:inline-flex;align-items:center;gap:5px;
+            font-size:11px;color:#8b949e;font-family:{FONT};">
+          <span style="width:9px;height:9px;border-radius:50%;
+              background:{lang_color};display:inline-block;flex-shrink:0;"></span>
+          {language}
         </span>""" if language else ""
 
-    category_pill = f"""<span style="font-size:11px;font-weight:500;color:#8b949e;
-            background:rgba(110,118,129,0.1);border:1px solid #30363d;
+    category_pill = f"""
+        <span style="font-size:11px;font-weight:500;color:#8b949e;
+            background:rgba(110,118,129,0.12);border:1px solid #21262d;
             border-radius:2em;padding:2px 10px;font-family:{FONT};">
-            {category}
+          {category}
         </span>""" if category else ""
+
+    multiple_color = "#a78bfa" if growth_multiple is not None else "#8b949e"
+    multiple_border = "rgba(167,139,250,0.2)" if growth_multiple is not None else "#30363d"
+    multiple_bg = "rgba(167,139,250,0.08)" if growth_multiple is not None else "rgba(110,118,129,0.12)"
+    multiple_badge = f"""
+        <span style="font-size:11px;color:{multiple_color};font-family:{MONO};
+            background:{multiple_bg};border:1px solid {multiple_border};
+            border-radius:2em;padding:2px 10px;">
+          {multiple_text}
+        </span>"""
+
+    # Alternating very-subtle row tint
+    bg = "#0d1117" if rank % 2 == 1 else "#0a0e14"
 
     return f"""
     <tr>
-      <td>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background:#0d1117;border-bottom:1px solid #21262d;">
+      <td style="background:{bg};border-bottom:1px solid #161b22;padding:18px 24px;">
+
+        <!-- top row: rank + name + growth badge -->
+        <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="padding:16px 24px;">
-
-              <!-- Repo name row -->
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td>
-                    <span style="font-size:12px;color:#6e7681;font-family:monospace;
-                        margin-right:8px;">#{rank}</span>
-                    <a href="{url}" style="font-size:15px;font-weight:600;color:#58a6ff;
-                        text-decoration:none;font-family:{FONT};">{name}</a>
-                  </td>
-                  <td align="right" style="white-space:nowrap;">
-                    <span style="font-size:12px;font-weight:600;color:#3fb950;font-family:monospace;
-                        background:rgba(46,160,67,0.1);border:1px solid rgba(46,160,67,0.4);
-                        border-radius:2em;padding:3px 10px;">
-                      {growth_badge_text}
-                    </span>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Description -->
-              <p style="margin:8px 0 12px;font-size:13px;color:#8b949e;line-height:1.5;
-                  font-family:{FONT};">{description}</p>
-
-              <!-- Meta row -->
-              <table cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding-right:16px;">{lang_badge}</td>
-                  <td style="padding-right:16px;">
-                    <span style="font-size:12px;color:#8b949e;font-family:{FONT};">
-                      &#9733; {stars:,}
-                    </span>
-                  </td>
-                  <td style="padding-right:16px;">
-                    <span style="font-size:12px;color:#8b949e;font-family:{FONT};">
-                      &#x2442; {forks:,}
-                    </span>
-                  </td>
-                  <td style="padding-right:16px;">
-                    <span style="font-size:12px;color:#8b949e;font-family:{FONT};">
-                      {multiple_text}
-                    </span>
-                  </td>
-                  <td>{category_pill}</td>
-                </tr>
-              </table>
-
+            <td style="vertical-align:middle;">
+              <span style="font-size:11px;font-weight:700;color:{rank_color};
+                  font-family:{MONO};margin-right:10px;">#{rank:02d}</span>
+              <a href="{url}"
+                 style="font-size:15px;font-weight:600;color:#58a6ff;
+                     text-decoration:none;font-family:{FONT};">{name}</a>
+            </td>
+            <td align="right" style="white-space:nowrap;vertical-align:middle;">
+              <span style="font-size:12px;font-weight:600;color:#3fb950;
+                  font-family:{MONO};background:rgba(46,160,67,0.1);
+                  border:1px solid rgba(46,160,67,0.35);
+                  border-radius:2em;padding:3px 12px;">
+                {growth_badge_text}
+              </span>
             </td>
           </tr>
         </table>
+
+        <!-- description -->
+        <p style="margin:9px 0 13px;font-size:13px;color:#6e7681;
+            line-height:1.55;font-family:{FONT};">{description}</p>
+
+        <!-- meta row -->
+        <table cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding-right:14px;">{lang_badge}</td>
+            <td style="padding-right:14px;">
+              <span style="font-size:11px;color:#8b949e;font-family:{FONT};">
+                &#9733;&nbsp;{stars:,}
+              </span>
+            </td>
+            <td style="padding-right:14px;">
+              <span style="font-size:11px;color:#8b949e;font-family:{FONT};">
+                &#x2442;&nbsp;{forks:,}
+              </span>
+            </td>
+            <td style="padding-right:14px;">{multiple_badge}</td>
+            <td>{category_pill}</td>
+          </tr>
+        </table>
+
       </td>
     </tr>
     """
@@ -159,87 +173,119 @@ def build_repo_card(repo, rank):
 
 def build_html_email(repos):
     date_str = datetime.utcnow().strftime("%B %d, %Y")
+    time_str = datetime.utcnow().strftime("%H:%M UTC")
     cards = "".join(build_repo_card(r, i + 1) for i, r in enumerate(repos))
 
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>GitPulse Daily Digest</title>
 </head>
-<body style="margin:0;padding:0;background:#010409;">
+<body style="margin:0;padding:0;background:#010409;font-family:{FONT};">
 
-  <table width="100%" cellpadding="0" cellspacing="0">
-    <tr>
-      <td align="center" style="padding:32px 16px;">
-        <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#010409;">
+  <tr>
+    <td align="center" style="padding:40px 16px 48px;">
 
-          <!-- HEADER -->
-          <tr>
-            <td style="padding-bottom:16px;">
-              <table width="100%" cellpadding="0" cellspacing="0"
-                  style="background:#0d1117;border:1px solid #30363d;border-radius:6px;">
-                <tr>
-                  <td style="padding:20px 24px 0;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td>
-                          <div style="font-size:18px;font-weight:700;color:#e6edf3;
-                              font-family:{FONT};letter-spacing:-0.2px;">
-                            GitPulse
-                          </div>
-                          <div style="font-size:12px;color:#8b949e;font-family:{FONT};margin-top:2px;">
-                            Daily Digest &middot; {date_str}
-                          </div>
-                        </td>
-                        <td align="right" style="vertical-align:top;">
-                          <span style="font-size:11px;color:#8b949e;font-family:monospace;
-                              background:#161b22;border:1px solid #30363d;
-                              border-radius:6px;padding:4px 10px;white-space:nowrap;">
-                            sorted by star growth
-                          </span>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                <!-- GitHub-style underline tab -->
-                <tr>
-                  <td style="padding:0 24px;border-top:1px solid #30363d;margin-top:12px;">
-                    <span style="display:inline-block;font-size:13px;font-weight:600;
-                        color:#e6edf3;font-family:{FONT};
-                        border-bottom:2px solid #f78166;padding:10px 0;margin-bottom:-1px;">
-                      Trending today
-                    </span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+      <table width="640" cellpadding="0" cellspacing="0"
+          style="max-width:640px;width:100%;">
 
-          <!-- REPO LIST — single bordered box like GitHub's file tree -->
-          <tr>
-            <td style="border:1px solid #30363d;border-radius:6px;overflow:hidden;">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                {cards}
-              </table>
-            </td>
-          </tr>
+        <!-- ── HEADER ───────────────────────────────── -->
+        <tr>
+          <td style="padding-bottom:4px;">
+            <table width="100%" cellpadding="0" cellspacing="0"
+                style="background:#0d1117;border:1px solid #21262d;
+                       border-radius:8px 8px 0 0;overflow:hidden;">
 
-          <!-- FOOTER -->
-          <tr>
-            <td style="padding-top:20px;text-align:center;
-                font-size:11px;color:#484f58;font-family:{FONT};line-height:1.8;">
+              <!-- Wordmark row -->
+              <tr>
+                <td style="padding:22px 28px 0;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td>
+                        <div style="font-size:20px;font-weight:700;
+                            color:#e6edf3;letter-spacing:-0.3px;">
+                          GitPulse
+                        </div>
+                        <div style="font-size:12px;color:#484f58;
+                            font-family:{MONO};margin-top:3px;">
+                          daily digest &middot; {date_str}
+                        </div>
+                      </td>
+                      <td align="right" style="vertical-align:top;">
+                        <span style="font-size:11px;color:#8b949e;
+                            font-family:{MONO};background:#161b22;
+                            border:1px solid #30363d;border-radius:6px;
+                            padding:5px 12px;white-space:nowrap;">
+                          sorted by &#9733; growth
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Tab bar -->
+              <tr>
+                <td style="padding:0 28px;">
+                  <table cellpadding="0" cellspacing="0"
+                      style="border-top:1px solid #21262d;margin-top:14px;width:100%;">
+                    <tr>
+                      <td style="padding:10px 0 0;">
+                        <span style="display:inline-block;font-size:13px;
+                            font-weight:600;color:#e6edf3;font-family:{FONT};
+                            border-bottom:2px solid #f78166;
+                            padding-bottom:10px;margin-bottom:-1px;">
+                          Trending today
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+
+        <!-- ── REPO LIST ─────────────────────────────── -->
+        <tr>
+          <td style="border:1px solid #21262d;border-top:none;
+              border-radius:0 0 8px 8px;overflow:hidden;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              {cards}
+            </table>
+          </td>
+        </tr>
+
+        <!-- ── DIVIDER ────────────────────────────────── -->
+        <tr>
+          <td style="padding:32px 0 0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="border-top:1px solid #161b22;"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ── FOOTER ─────────────────────────────────── -->
+        <tr>
+          <td style="padding:20px 0 0;text-align:center;">
+            <div style="font-size:12px;color:#30363d;font-family:{MONO};
+                line-height:2;">
               GitPulse &middot; Automated Daily Digest<br/>
-              Data sourced from GitHub Trending &middot; {datetime.utcnow().strftime("%H:%M UTC")}
-            </td>
-          </tr>
+              Data sourced from GitHub Trending &middot; {time_str}
+            </div>
+          </td>
+        </tr>
 
-        </table>
-      </td>
-    </tr>
-  </table>
+      </table>
+    </td>
+  </tr>
+</table>
 
 </body>
 </html>"""

@@ -41,7 +41,7 @@ function showStatus(text, isSubscribed) {
 
 async function subscribe() {
     const email = document.getElementById('email').value.trim();
-    const categoryNodes = document.querySelectorAll('.category-input:checked');
+    const categoryNodes = document.querySelectorAll('.pill-check:checked');
     const categories = Array.from(categoryNodes).map(node => node.value);
     if (!email) {
         showMessage('Please enter an email address', 'error');
@@ -56,10 +56,10 @@ async function subscribe() {
         });
         const data = await response.json();
 
-        if (response.ok) {
+        if (response.ok && data.success !== false) {
             showStatus(`Status: active for ${email}`, true);
         } else {
-            showMessage(data.detail || 'Subscription failed', 'error');
+            showMessage(data.message || data.detail || 'Subscription failed', 'error');
         }
     } catch (error) {
         showMessage('Unable to connect to server. Is it running?', 'error');
@@ -88,7 +88,7 @@ async function unsubscribe() {
                 showMessage(`Status: inactive for ${email}`, 'info');
             }
         } else {
-            showMessage(data.detail || 'Unsubscription failed', 'error');
+            showMessage(data.message || data.detail || 'Unsubscription failed', 'error');
         }
     } catch (error) {
         showMessage('Unable to connect to server. Is it running?', 'error');

@@ -10,7 +10,7 @@ load_dotenv()
 
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client[os.getenv("DB_NAME")]
-collection = db["trending_repos_test"]
+collection = db["trending_repos"]
 collection.create_index([("name", 1), ("scraped_date", 1)], unique=True)
 
 URL = "https://github.com/trending"
