@@ -1,193 +1,105 @@
-/* Tailwind Config */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-body { 
-    background-color: #0a0a0f; 
-}
-
-/* Scanline overlay */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.03) 2px,
-        rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 50;
-}
-
-body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent);
-    animation: scan 4s linear infinite;
-    pointer-events: none;
-    z-index: 51;
-}
-
-.grid-bg {
-    background-image:
-        linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
-    background-size: 40px 40px;
-}
-
-.glow-cyan { text-shadow: 0 0 20px rgba(0,229,255,0.5), 0 0 40px rgba(0,229,255,0.2); }
-.glow-violet { text-shadow: 0 0 20px rgba(139,92,246,0.5); }
-
-.gradient-text {
-    background: linear-gradient(135deg, #00e5ff 0%, #8b5cf6 50%, #00e5ff 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: shimmer 4s linear infinite;
-}
-
-@keyframes shimmer {
-    0% { background-position: 0% center; }
-    100% { background-position: 200% center; }
-}
-
-@keyframes scan {
-    0% { top: -2px; }
-    100% { top: 100vh; }
-}
-
-.cursor::after {
-    content: '█';
-    animation: blink 1.2s step-end infinite;
-    color: #00e5ff;
-    font-size: 0.8em;
-}
-
-/* Terminal Input */
-.term-input {
-    background: rgba(0,229,255,0.03);
-    border: 1px solid rgba(0,229,255,0.2);
-    color: #e0e0f0;
-    font-family: 'Ubuntu Mono', monospace;
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
-.term-input:focus {
-    outline: none;
-    border-color: rgba(0,229,255,0.6);
-    box-shadow: 0 0 0 3px rgba(0,229,255,0.08), 0 0 20px rgba(0,229,255,0.1);
-}
-
-/* Panel */
-.panel {
-    background: rgba(19,19,31,0.9);
-    border: 1px solid #1e1e30;
-    backdrop-filter: blur(12px);
-}
-
-/* Animations */
-.animate-fade-up { animation: fadeUp 0.6s ease forwards; }
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.25s; }
-.delay-3 { animation-delay: 0.4s; }
-.delay-4 { animation-delay: 0.55s; }
-
-@keyframes fadeUp {
-    0% { opacity: 0; transform: translateY(24px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
-/* Other styles (feature lines, buttons, etc.) */
-.btn-press:active { transform: scale(0.98); }
-
-.feature-line {
-    border-left: 2px solid rgba(0,229,255,0.2);
-    transition: border-color 0.2s;
-}
-.feature-line:hover {
-    border-left-color: rgba(0,229,255,0.6);
-}
-
-/* Category pills */
-.category-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-.category-pill input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-.category-pill span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 9999px;
-    border: 1px solid rgba(139,92,246,0.25);
-    background: radial-gradient(120% 120% at 10% 10%, rgba(0,229,255,0.08), rgba(139,92,246,0.04));
-    color: #b6b6d6;
-    font-family: 'Ubuntu Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, color 0.2s ease;
-}
-.category-pill span:hover {
-    border-color: rgba(0,229,255,0.6);
-    box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
-}
-.category-pill input:checked + span {
-    border-color: rgba(0,255,136,0.6);
-    color: #eafff6;
-    background: radial-gradient(120% 120% at 10% 10%, rgba(0,255,136,0.18), rgba(0,229,255,0.08));
-    box-shadow: 0 0 0 3px rgba(0,255,136,0.12), 0 0 18px rgba(0,255,136,0.12);
-}
-.category-pill input:focus + span {
-    outline: none;
-    border-color: rgba(0,229,255,0.8);
-    box-shadow: 0 0 0 3px rgba(0,229,255,0.12);
-}
-
-/* Corner Decorators */
-.corner-tl::before, .corner-tl::after {
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 10px;
-}
-
-/* Responsive Email Preview */
-.repo-item {
-    transition: all 0.2s ease;
-}
-
-@media (max-width: 480px) {
-    .repo-item {
-        margin-bottom: 16px;
+    body {
+      background-color: #080b10;
+      background-image:
+        radial-gradient(ellipse 80% 40% at 50% -10%, rgba(34,211,238,0.07) 0%, transparent 60%),
+        linear-gradient(180deg, transparent 60%, rgba(167,139,250,0.04) 100%);
     }
-    
-    .repo-item div[style*="padding:16px 20px"] {
-        padding: 14px 16px !important;
+
+    /* Dot grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
     }
-    
-    .repo-item p {
-        font-size: 13px !important;
-        line-height: 1.45 !important;
+
+    .glow-cyan   { text-shadow: 0 0 32px rgba(34,211,238,0.35); }
+    .glow-violet { text-shadow: 0 0 20px rgba(167,139,250,0.3); }
+
+    .panel-border {
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(13,17,23,0.85);
+      backdrop-filter: blur(8px);
     }
-}
+    .panel-border:hover {
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .accent-cyan   { border-left: 2px solid rgba(34,211,238,0.45); }
+    .accent-violet { border-left: 2px solid rgba(167,139,250,0.45); }
+
+    .pill-check { display: none; }
+    .pill-label {
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      color: #6b7280;
+      background: rgba(255,255,255,0.02);
+      user-select: none;
+    }
+    .pill-check:checked + .pill-label {
+      border-color: rgba(34,211,238,0.5);
+      background: rgba(34,211,238,0.07);
+      color: #22d3ee;
+    }
+    .pill-label:hover { border-color: rgba(255,255,255,0.18); color: #9ca3af; }
+
+    input[type="email"] {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e5e7eb;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.18s;
+      caret-color: #22d3ee;
+    }
+    input[type="email"]::placeholder { color: #374151; }
+    input[type="email"]:focus { border-color: rgba(34,211,238,0.4); }
+
+    .btn-main {
+      background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
+      color: #080b10;
+      font-weight: 700;
+      border-radius: 8px;
+      transition: opacity 0.18s, transform 0.12s;
+    }
+    .btn-main:hover { opacity: 0.88; }
+    .btn-main:active { transform: scale(0.97); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: #4b5563;
+      border-radius: 8px;
+      transition: border-color 0.18s, color 0.18s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.15); color: #6b7280; }
+
+    /* Repo card hover line */
+    .repo-card {
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      transition: border-color 0.18s;
+    }
+    .repo-card:hover { border-color: rgba(34,211,238,0.25); }
+
+    /* Corner brackets */
+    .bracket::before,
+    .bracket::after,
+    .bracket > span::before,
+    .bracket > span::after { content: ''; position: absolute; width: 10px; height: 10px; }
+    .bracket::before  { top:0;    left:0;    border-top:1.5px solid; border-left:1.5px solid;  border-color: inherit; }
+    .bracket::after   { top:0;    right:0;   border-top:1.5px solid; border-right:1.5px solid; border-color: inherit; }
+    .bracket > span::before { bottom:0; left:0;    border-bottom:1.5px solid; border-left:1.5px solid;  border-color: inherit; }
+    .bracket > span::after  { bottom:0; right:0;   border-bottom:1.5px solid; border-right:1.5px solid; border-color: inherit; }
+
+    #message { min-height: 0; }

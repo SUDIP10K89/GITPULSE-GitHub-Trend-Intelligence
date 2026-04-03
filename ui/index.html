@@ -1,290 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitPulse - GitHub Trending Digest</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitPulse — GitHub Trending Digest</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            night: '#080b10',
+            surface: '#0d1117',
+            panel: '#111827',
+            border: '#1f2937',
+            muted: '#374151',
+            dim: '#6b7280',
+            soft: '#9ca3af',
+            bright: '#e5e7eb',
+            cyan: '#22d3ee',
+            violet: '#a78bfa',
+            emerald: '#34d399',
+          },
+          keyframes: {
+            'fade-up': {
+              '0%': { opacity: '0', transform: 'translateY(18px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            blink: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0' },
+            },
+            pulse: {
+              '0%, 100%': { opacity: '0.4' },
+              '50%': { opacity: '0.9' },
+            },
+          },
+          animation: {
+            'fade-up-1': 'fade-up 0.55s ease both 0.05s',
+            'fade-up-2': 'fade-up 0.55s ease both 0.15s',
+            'fade-up-3': 'fade-up 0.55s ease both 0.25s',
+            'fade-up-4': 'fade-up 0.55s ease both 0.35s',
+            'fade-up-5': 'fade-up 0.55s ease both 0.45s',
+            blink: 'blink 1.1s step-end infinite',
+            'pulse-ring': 'pulse 2.8s ease-in-out infinite',
+          },
+        },
+      },
+    };
+  </script>
+
+    <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="font-display text-[#c8c8e0] grid-bg min-h-screen">
 
-    <div class="max-w-2xl mx-auto px-5 py-16 space-y-8">
+<body class="font-mono text-soft min-h-screen relative">
+  <div class="relative z-10 max-w-2xl mx-auto px-5 py-16 space-y-8">
 
-        <!-- Header -->
-        <div class="text-center animate-fade-up delay-1 relative">
-            <div class="inline-flex items-center justify-center w-16 h-16 mb-5 relative">
-                <div class="absolute inset-0 rounded-full border border-cyan-DEFAULT/20 animate-pulse-slow"></div>
-                <div class="absolute inset-2 rounded-full border border-cyan-DEFAULT/10"></div>
-                <svg viewBox="0 0 64 64" class="w-10 h-10 relative z-10" fill="none">
-                    <circle cx="32" cy="32" r="28" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.3"/>
-                    <circle cx="32" cy="32" r="18" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.2"/>
-                    <circle cx="32" cy="32" r="8" stroke="#00e5ff" stroke-width="1" stroke-opacity="0.4"/>
-                    <circle cx="32" cy="32" r="2.5" fill="#00e5ff" fill-opacity="0.9"/>
-                    <line x1="32" y1="32" x2="52" y2="12" stroke="#00e5ff" stroke-width="1.5" stroke-opacity="0.7" stroke-linecap="round"/>
-                    <circle cx="46" cy="18" r="2" fill="#00e5ff" fill-opacity="0.6"/>
-                    <circle cx="24" cy="20" r="1.5" fill="#8b5cf6" fill-opacity="0.7"/>
-                    <circle cx="40" cy="38" r="1.5" fill="#00ff88" fill-opacity="0.6"/>
-                </svg>
-            </div>
+    <!-- ── HEADER ─────────────────────────────────────── -->
+    <div class="text-center animate-fade-up-1">
 
-            <h1 class="text-5xl font-black tracking-tighter gradient-text glow-cyan mb-2">
-                GitPulse
-            </h1>
-            <p class="font-mono text-sm text-[#4a4a6a] tracking-widest uppercase">
-                <span class="text-cyan-DEFAULT/60">//</span>
-                Stay ahead with daily GitHub trending insights
-                <span class="cursor"></span>
-            </p>
-        </div>
+      <!-- Icon -->
+      <div class="inline-flex items-center justify-center w-16 h-16 mb-6 relative">
+        <div class="absolute inset-0 rounded-full border border-cyan/20 animate-pulse-ring"></div>
+        <div class="absolute inset-2 rounded-full border border-cyan/10"></div>
+        <svg viewBox="0 0 64 64" class="w-10 h-10 relative z-10" fill="none">
+          <circle cx="32" cy="32" r="28" stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.25"/>
+          <circle cx="32" cy="32" r="18" stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.15"/>
+          <circle cx="32" cy="32" r="8"  stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.35"/>
+          <circle cx="32" cy="32" r="2.5" fill="#22d3ee" fill-opacity="0.9"/>
+          <line x1="32" y1="32" x2="52" y2="12" stroke="#22d3ee" stroke-width="1.5" stroke-opacity="0.7" stroke-linecap="round"/>
+          <circle cx="46" cy="18" r="2"   fill="#22d3ee"  fill-opacity="0.6"/>
+          <circle cx="24" cy="20" r="1.5" fill="#a78bfa"  fill-opacity="0.7"/>
+          <circle cx="40" cy="38" r="1.5" fill="#34d399"  fill-opacity="0.6"/>
+        </svg>
+      </div>
 
-        <!-- What is GitPulse -->
-        <div class="panel rounded-xl p-7 panel-accent-cyan animate-fade-up delay-2 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-DEFAULT/60 rounded-tl"></div>
-            <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-DEFAULT/60 rounded-tr"></div>
-            <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-DEFAULT/20 rounded-bl"></div>
-            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-DEFAULT/20 rounded-br"></div>
-
-            <div class="flex items-center gap-2 mb-4">
-                <span class="font-mono text-xs text-cyan-DEFAULT/50 tracking-widest uppercase">sys.info</span>
-                <div class="flex-1 h-px bg-gradient-to-r from-cyan-DEFAULT/20 to-transparent"></div>
-            </div>
-
-            <h2 class="text-xl font-bold text-white mb-3">What is GitPulse?</h2>
-            <p class="text-[#6060a0] font-mono text-sm leading-relaxed mb-5">
-                GitPulse monitors GitHub's trending repositories daily and delivers a curated digest to your inbox. Never miss the next big open-source project again.
-            </p>
-
-            <ul class="space-y-3">
-                <li class="feature-line pl-4 py-1">
-                    <span class="font-mono text-xs text-cyan-DEFAULT/70 block">01 —</span>
-                    <span class="text-[#8888b0] text-sm">Scrapes trending repositories automatically every day</span>
-                </li>
-                <li class="feature-line pl-4 py-1">
-                    <span class="font-mono text-xs text-violet-DEFAULT/70 block">02 —</span>
-                    <span class="text-[#8888b0] text-sm">AI-powered categorization into AI, DevTools, Web, Mobile, and more</span>
-                </li>
-                <li class="feature-line pl-4 py-1">
-                    <span class="font-mono text-xs text-emerald-DEFAULT/70 block">03 —</span>
-                    <span class="text-[#8888b0] text-sm">Tracks star growth to identify accelerating projects</span>
-                </li>
-                <li class="feature-line pl-4 py-1">
-                    <span class="font-mono text-xs text-cyan-DEFAULT/70 block">04 —</span>
-                    <span class="text-[#8888b0] text-sm">Delivers a daily email with top accelerating repos</span>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Email Preview -->
-<div class="panel rounded-xl p-7 panel-accent-cyan animate-fade-up delay-3 relative overflow-hidden">
-    <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-cyan-DEFAULT/60 rounded-tl"></div>
-    <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-cyan-DEFAULT/60 rounded-tr"></div>
-    <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-cyan-DEFAULT/20 rounded-bl"></div>
-    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-cyan-DEFAULT/20 rounded-br"></div>
-
-    <div class="flex items-center gap-2 mb-5">
-        <span class="font-mono text-xs text-cyan-DEFAULT/50 tracking-widest uppercase">digest.preview</span>
-        <div class="flex-1 h-px bg-gradient-to-r from-cyan-DEFAULT/20 to-transparent"></div>
+      <h1 class="font-display text-5xl font-extrabold tracking-tight text-bright glow-cyan mb-2">
+        GitPulse
+      </h1>
+      <p class="text-xs text-muted tracking-widest uppercase">
+        <span class="text-cyan/40">//</span>
+        daily github trending digest
+        <span class="inline-block w-0.5 h-3 bg-cyan/60 ml-0.5 -mb-0.5 animate-blink"></span>
+      </p>
     </div>
 
-    <h3 class="text-xl font-bold text-white mb-4">Email Preview</h3>
+    <!-- ── WHAT IS GITPULSE ───────────────────────────── -->
+    <div class="panel-border rounded-xl p-7 accent-cyan relative overflow-hidden animate-fade-up-2" style="border-color: rgba(34,211,238,0.12);">
 
-    <!-- Responsive Email Container -->
-    <div class="rounded-xl border border-[#1e1e30] bg-[#0b0f14] p-4 shadow-cyan-glow overflow-hidden">
-        <div class="mx-auto" style="max-width: 640px; width: 100%;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#010409; border-radius: 8px; overflow: hidden;">
-                <tr>
-                    <td align="center" style="padding: 20px 10px;">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 640px; width: 100%; background:#0d1117; border:1px solid #30363d; border-radius:6px;">
-                            <!-- Header -->
-                            <tr>
-                                <td style="padding: 20px 24px 12px;">
-                                    <table width="100%" cellpadding="0" cellspacing="0">
-                                        <tr>
-                                            <td>
-                                                <div style="font-size: 18px; font-weight: 700; color: #e6edf3; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
-                                                    GitPulse
-                                                </div>
-                                                <div style="font-size: 12px; color: #8b949e; margin-top: 2px;">
-                                                    Daily Digest · Sample Preview
-                                                </div>
-                                            </td>
-                                            <td align="right" style="vertical-align: top;">
-                                                <span style="font-size: 11px; color: #8b949e; font-family: monospace; background:#161b22; border:1px solid #30363d; border-radius:6px; padding:4px 10px; white-space:nowrap;">
-                                                    sorted by star growth
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
+      <div class="flex items-center gap-2 mb-5">
+        <span class="text-xs text-cyan/50 tracking-widest uppercase">sys.info</span>
+        <div class="flex-1 h-px bg-gradient-to-r from-cyan/15 to-transparent"></div>
+      </div>
 
-                            <tr>
-                                <td style="padding: 0 24px 12px;">
-                                    <span style="display:inline-block; font-size:13px; font-weight:600; color:#e6edf3; border-bottom:2px solid #f78166; padding:8px 0;">
-                                        Trending today
-                                    </span>
-                                </td>
-                            </tr>
+      <h2 class="font-display text-xl font-bold text-bright mb-3">What is GitPulse?</h2>
+      <p class="text-sm text-dim leading-relaxed mb-6">
+        GitPulse monitors GitHub's trending repositories daily and delivers a curated digest straight to your inbox.
+        Never miss the next big open-source project again.
+      </p>
 
-                            <!-- Repo Items -->
-                            <tr>
-                                <td style="padding: 0 16px 16px;">
-                                    <!-- Repo 1 -->
-                                    <div class="repo-item" style="background:#0d1117; border:1px solid #21262d; border-radius:6px; margin-bottom:12px; overflow:hidden;">
-                                        <div style="padding:16px 20px;">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <span style="font-size:12px; color:#6e7681; font-family:monospace;">#1</span>
-                                                    <span style="font-size:15px; font-weight:600; color:#58a6ff; margin-left:6px;">repo-radar-ui</span>
-                                                </div>
-                                                <span style="font-size:12px; font-weight:600; color:#3fb950; background:rgba(46,160,67,0.1); border:1px solid rgba(46,160,67,0.4); border-radius:9999px; padding:3px 12px; white-space:nowrap;">
-                                                    +1,248 today
-                                                </span>
-                                            </div>
-                                            <p style="margin:10px 0 12px; font-size:13.5px; color:#8b949e; line-height:1.5;">
-                                                Clean, GitHub-inspired UI kit for trend tracking dashboards.
-                                            </p>
-                                            <div class="flex flex-wrap gap-4 text-xs text-[#8b949e]">
-                                                <span> TypeScript</span>
-                                                <span>★ 18,502</span>
-                                                <span>⑂ 1,321</span>
-                                                <span class="bg-[#21262d] px-3 py-0.5 rounded-full">Web</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Repo 2 -->
-                                    <div class="repo-item" style="background:#0d1117; border:1px solid #21262d; border-radius:6px; overflow:hidden;">
-                                        <div style="padding:16px 20px;">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <span style="font-size:12px; color:#6e7681; font-family:monospace;">#2</span>
-                                                    <span style="font-size:15px; font-weight:600; color:#58a6ff; margin-left:6px;">trendpipe</span>
-                                                </div>
-                                                <span style="font-size:12px; font-weight:600; color:#3fb950; background:rgba(46,160,67,0.1); border:1px solid rgba(46,160,67,0.4); border-radius:9999px; padding:3px 12px; white-space:nowrap;">
-                                                    +834 today
-                                                </span>
-                                            </div>
-                                            <p style="margin:10px 0 12px; font-size:13.5px; color:#8b949e; line-height:1.5;">
-                                                Zero-config pipeline for detecting accelerating GitHub repos.
-                                            </p>
-                                            <div class="flex flex-wrap gap-4 text-xs text-[#8b949e]">
-                                                <span> Python</span>
-                                                <span>★ 9,440</span>
-                                                <span>⑂ 611</span>
-                                                <span class="bg-[#21262d] px-3 py-0.5 rounded-full">AI</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Footer -->
-                            <tr>
-                                <td style="padding: 20px; text-align:center; font-size:11px; color:#484f58;">
-                                    GitPulse · Automated Daily Digest
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </div>
+      <ul class="space-y-3">
+        <li class="flex gap-3 items-start">
+          <span class="text-xs text-cyan/60 pt-0.5 shrink-0">01 —</span>
+          <span class="text-sm text-soft/80">Scrapes trending repositories automatically every day</span>
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="text-xs text-violet/60 pt-0.5 shrink-0">02 —</span>
+          <span class="text-sm text-soft/80">AI-powered categorisation into AI, DevTools, Web, Mobile and more</span>
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="text-xs text-emerald/60 pt-0.5 shrink-0">03 —</span>
+          <span class="text-sm text-soft/80">Tracks star growth to surface accelerating projects early</span>
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="text-xs text-cyan/60 pt-0.5 shrink-0">04 —</span>
+          <span class="text-sm text-soft/80">Delivers a clean daily email with today's top movers</span>
+        </li>
+      </ul>
     </div>
-</div>
 
-        <!-- Subscribe Card -->
-        <div class="panel rounded-xl p-7 panel-accent-violet animate-fade-up delay-4 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-violet-DEFAULT/60 rounded-tl"></div>
-            <div class="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-violet-DEFAULT/60 rounded-tr"></div>
-            <div class="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-violet-DEFAULT/20 rounded-bl"></div>
-            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-violet-DEFAULT/20 rounded-br"></div>
+    <!-- ── EMAIL PREVIEW ─────────────────────────────── -->
+    <div class="panel-border rounded-xl overflow-hidden animate-fade-up-3" style="border-color: rgba(255,255,255,0.07);">
 
-            <div class="flex items-center gap-2 mb-5">
-                <span class="font-mono text-xs text-violet-DEFAULT/50 tracking-widest uppercase">subscribe.exec</span>
-                <div class="flex-1 h-px bg-gradient-to-r from-violet-DEFAULT/20 to-transparent"></div>
-            </div>
+      <!-- Meta bar -->
+      <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color: rgba(255,255,255,0.05); background: rgba(255,255,255,0.015);">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-red-500/60"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/60"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-green-500/60"></div>
+        </div>
+        <span class="text-xs text-muted">email preview</span>
+        <span class="text-xs text-dim bg-muted/20 px-2 py-0.5 rounded">sorted by star growth</span>
+      </div>
 
-            <h3 class="text-xl font-bold text-white mb-5">Subscribe to Daily Digest</h3>
+      <!-- Email body -->
+      <div class="bg-[#0d1117] p-5">
 
-            <div class="mb-5">
-                <label for="email" class="font-mono text-xs text-[#4a4a6a] uppercase tracking-widest block mb-2">
-                    &gt; email_address
-                </label>
-                <input type="email" id="email" placeholder="you@example.com" required
-                       class="term-input w-full px-4 py-3.5 rounded-lg text-sm">
-            </div>
-
-            <div class="mb-6">
-                <label class="font-mono text-xs text-[#4a4a6a] uppercase tracking-widest block mb-3">
-                    &gt; categories (optional)
-                </label>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-                    <label class="category-pill">
-                        <input type="checkbox" class="category-input" value="AI">
-                        <span>AI</span>
-                    </label>
-                    <label class="category-pill">
-                        <input type="checkbox" class="category-input" value="Developer Tools">
-                        <span>Developer Tools</span>
-                    </label>
-                    <label class="category-pill">
-                        <input type="checkbox" class="category-input" value="Infrastructure">
-                        <span>Infrastructure</span>
-                    </label>
-                    <label class="category-pill">
-                        <input type="checkbox" class="category-input" value="Web">
-                        <span>Web</span>
-                    </label>
-                    <label class="category-pill">
-                        <input type="checkbox" class="category-input" value="Mobile">
-                        <span>Mobile</span>
-                    </label>
-                    <label class="category-pill">
-                        <input type="checkbox" class="category-input" value="Other">
-                        <span>Other</span>
-                    </label>
-                </div>
-                <p class="mt-2 text-xs font-mono text-[#4a4a6a]">Leave empty to receive all categories.</p>
-            </div>
-
-            <div class="flex gap-3">
-                <button onclick="subscribe()" 
-                        class="btn-press flex-1 py-3.5 rounded-lg font-bold text-sm font-mono tracking-wide text-night transition-all duration-200 relative overflow-hidden group"
-                        style="background: linear-gradient(135deg, #00e5ff, #8b5cf6);">
-                    <span class="relative z-10">[ SUBSCRIBE ]</span>
-                </button>
-
-                <button onclick="unsubscribe()"
-                        class="btn-press flex-1 py-3.5 rounded-lg font-bold text-sm font-mono tracking-wide text-[#6060a0] border border-[#1e1e30] hover:border-[#3e3e60] hover:text-[#9090c0] transition-all duration-200"
-                        style="background: rgba(255,255,255,0.02);">
-                    [ UNSUB ]
-                </button>
-            </div>
-
-            <div id="message" class="mt-4 px-4 py-3 rounded-lg font-mono text-sm text-center"></div>
-            <div id="status" class="mt-4 px-5 py-4 rounded-lg text-center border hidden"
-                 style="background: rgba(0,255,136,0.04); border-color: rgba(0,255,136,0.15);">
-                <div class="text-2xl mb-1" id="status-icon">✓</div>
-                <p id="status-text" class="font-mono text-sm text-emerald-DEFAULT/80"></p>
-            </div>
+        <!-- Email header -->
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-base font-bold text-bright font-display">GitPulse</p>
+            <p class="text-xs text-dim mt-0.5">Daily Digest · Sample Preview</p>
+          </div>
         </div>
 
-        <!-- Footer -->
-        <div class="text-center animate-fade-up delay-4">
-            <p class="font-mono text-xs text-[#2e2e50] tracking-widest">
-                POWERED BY <a href="#" class="text-cyan-DEFAULT/50 hover:text-cyan-DEFAULT transition-colors">GITPULSE</a>
-                <span class="mx-2 text-[#1e1e40]">|</span>
-                <span class="text-[#2e2e50]">OPEN SOURCE</span>
+        <!-- Section label -->
+        <div class="mb-4">
+          <span class="text-sm font-semibold text-bright border-b-2 border-red-400/70 pb-1.5">
+            Trending today
+          </span>
+        </div>
+
+        <!-- Repo cards -->
+        <div class="space-y-3">
+
+          <!-- Repo 1 -->
+          <div class="repo-card p-4">
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-dim">#1</span>
+                <span class="text-sm font-semibold text-blue-400">repo-radar-ui</span>
+              </div>
+              <span class="text-xs font-semibold text-emerald shrink-0 bg-emerald/10 border border-emerald/25 rounded-full px-3 py-0.5">
+                +1,248 today
+              </span>
+            </div>
+            <p class="text-xs text-dim leading-relaxed mb-3">
+              Clean, GitHub-inspired UI kit for trend tracking dashboards.
             </p>
+            <div class="flex flex-wrap gap-3 text-xs text-muted">
+              <span>TypeScript</span>
+              <span>★ 18,502</span>
+              <span>⑂ 1,321</span>
+              <span class="bg-muted/20 px-2.5 py-0.5 rounded-full text-dim">Web</span>
+            </div>
+          </div>
+
+          <!-- Repo 2 -->
+          <div class="repo-card p-4">
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-dim">#2</span>
+                <span class="text-sm font-semibold text-blue-400">trendpipe</span>
+              </div>
+              <span class="text-xs font-semibold text-emerald shrink-0 bg-emerald/10 border border-emerald/25 rounded-full px-3 py-0.5">
+                +834 today
+              </span>
+            </div>
+            <p class="text-xs text-dim leading-relaxed mb-3">
+              Zero-config pipeline for detecting accelerating GitHub repos.
+            </p>
+            <div class="flex flex-wrap gap-3 text-xs text-muted">
+              <span>Python</span>
+              <span>★ 9,440</span>
+              <span>⑂ 611</span>
+              <span class="bg-muted/20 px-2.5 py-0.5 rounded-full text-dim">AI</span>
+            </div>
+          </div>
+
         </div>
 
+        <!-- Email footer -->
+        <p class="text-center text-xs text-muted/40 mt-5">GitPulse · Automated Daily Digest</p>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- ── SUBSCRIBE ──────────────────────────────────── -->
+    <div class="panel-border rounded-xl p-7 relative overflow-hidden animate-fade-up-4" style="border-color: rgba(167,139,250,0.12);">
+      <div style="position:absolute;top:0;right:0;width:220px;height:220px;background:radial-gradient(ellipse at top right,rgba(167,139,250,0.06),transparent 70%);pointer-events:none;"></div>
+
+      <div class="flex items-center gap-2 mb-5">
+        <span class="text-xs text-violet/50 tracking-widest uppercase">subscribe.exec</span>
+        <div class="flex-1 h-px bg-gradient-to-r from-violet/15 to-transparent"></div>
+      </div>
+
+      <h3 class="font-display text-xl font-bold text-bright mb-6">Subscribe to Daily Digest</h3>
+
+      <!-- Email field -->
+      <div class="mb-5">
+        <label for="email" class="block text-xs text-muted tracking-widest uppercase mb-2">&gt; email_address</label>
+        <input type="email" id="email" placeholder="you@example.com"
+               class="w-full px-4 py-3.5 text-sm" />
+      </div>
+
+      <!-- Categories -->
+      <div class="mb-6">
+        <label class="block text-xs text-muted tracking-widest uppercase mb-3">&gt; categories <span class="text-muted/40 normal-case">(optional)</span></label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <label><input type="checkbox" class="pill-check" value="AI"><span class="pill-label">AI</span></label>
+          <label><input type="checkbox" class="pill-check" value="DevTools"><span class="pill-label">DevTools</span></label>
+          <label><input type="checkbox" class="pill-check" value="Infrastructure"><span class="pill-label">Infra</span></label>
+          <label><input type="checkbox" class="pill-check" value="Web"><span class="pill-label">Web</span></label>
+          <label><input type="checkbox" class="pill-check" value="Mobile"><span class="pill-label">Mobile</span></label>
+          <label><input type="checkbox" class="pill-check" value="Other"><span class="pill-label">Other</span></label>
+        </div>
+        <p class="mt-2.5 text-xs text-muted/50">Leave empty to receive all categories.</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3">
+        <button onclick="subscribe()" class="btn-main flex-1 py-3.5 text-sm tracking-wide">
+          [ subscribe ]
+        </button>
+        <button onclick="unsubscribe()" class="btn-ghost flex-1 py-3.5 text-sm">
+          [ unsub ]
+        </button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="message" class="mt-4 text-sm text-center text-cyan/70 font-mono"></div>
+      <div id="status" class="hidden mt-4 px-5 py-4 rounded-lg text-center border"
+           style="background:rgba(52,211,153,0.04); border-color:rgba(52,211,153,0.15);">
+        <div class="text-2xl mb-1" id="status-icon">✓</div>
+        <p id="status-text" class="text-sm text-emerald/80"></p>
+      </div>
+    </div>
+
+    <!-- ── FOOTER ─────────────────────────────────────── -->
+    <div class="text-center animate-fade-up-5">
+      <p class="text-xs text-muted/30 tracking-widest uppercase">
+        powered by <a href="#" class="text-cyan/30 hover:text-cyan/70 transition-colors">gitpulse</a>
+        <span class="mx-2 text-muted/20">|</span>
+        open source
+      </p>
+    </div>
+
+  </div>
+
+  
+ <script src="script.js"></script>
 </body>
 </html>
